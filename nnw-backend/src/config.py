@@ -3,7 +3,6 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     ENV: str = "development"
-    ENV: str = "development"
     PG_USER: str
     PG_PASSWORD: str
     PG_HOST: str
