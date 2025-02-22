@@ -6,15 +6,18 @@ from datetime import datetime, timedelta
 from fastapi import APIRouter, HTTPException, Depends, Body
 from fastapi.security import OAuth2PasswordRequestForm
 import jwt
+from models.profile import Profile
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
-from nnw_backend.models import SessionLocal
-from nnw_backend.models.user import User
-from nnw_backend.models.refresh_token import RefreshToken
-from nnw_backend.schemas.user import UserCreate
-from nnw_backend.schemas.token import TokenResponse
-from nnw_backend.config import settings
+from models import SessionLocal
+from models.user import User
+from models.refresh_token import RefreshToken
+
+from schemas.user import UserRegistration
+from schemas.token import TokenResponse
+
+from config import settings
 
 router = APIRouter()
 
@@ -67,25 +70,40 @@ def hash_jti(jti: str) -> str:
 
 
 @router.post("/register")
-def register(
-    email: str = Form(...),
-    password: str = Form(...),
-    db: Session = Depends(get_db)
-):
-    existing = db.query(User).filter(User.email == email).first()
+def register(reg_data: UserRegistration, db: Session = Depends(get_db)):
+
+    existing = db.query(User).filter(User.email == reg_data.email).first()
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
-    hashed_pw = get_password_hash(password)
-    new_user = User(email=email, hashed_password=hashed_pw)
+
+    # Create the user record
+    hashed_pw = get_password_hash(reg_data.password)
+    new_user = User(email=reg_data.email, hashed_password=hashed_pw)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    return {"message": "User registered", "user_id": new_user.id}
+
+    # Create the profile record referencing the new user
+    profile = Profile(
+        user_id=new_user.id,
+        name=reg_data.name,
+        mobile=reg_data.mobile,
+        dob=reg_data.dob,
+        address=reg_data.address,
+        job_title=reg_data.job_title,
+        monthly_income=reg_data.monthly_income,
+        monthly_expenses=reg_data.monthly_expenses
+    )
+    db.add(profile)
+    db.commit()
+
+    return {"message": "User registered with profile", "user_id": new_user.id}
 
 
 @router.post("/login", response_model=TokenResponse)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == form_data.username).first()
+    user = db.query(UserRegistration).filter(
+        UserRegistration.email == form_data.username).first()
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 

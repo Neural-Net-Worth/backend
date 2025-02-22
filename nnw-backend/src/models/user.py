@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-from nnw_backend.models import Base
+from models import Base
 
 
 class User(Base):
@@ -12,3 +12,5 @@ class User(Base):
 
     refresh_tokens = relationship(
         "RefreshToken", back_populates="user", cascade="all, delete-orphan")
+    profile = relationship("Profile", back_populates="user",
+                           uselist=False, cascade="all, delete-orphan")

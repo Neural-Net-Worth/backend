@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from nnw_backend.models import Base
+from models import Base
 
 
 class RefreshToken(Base):

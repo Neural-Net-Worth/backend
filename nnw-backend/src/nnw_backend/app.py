@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from nnw_backend.models import init_db
-from nnw_backend.routers import auth
+from models import init_db
+from routers import auth
 
 app = FastAPI()
 

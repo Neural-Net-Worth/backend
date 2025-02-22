@@ -1,4 +1,4 @@
-from nnw_backend.config import settings
+from config import settings
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
@@ -10,6 +10,7 @@ Base = declarative_base()
 
 
 def init_db():
-    from nnw_backend.models.user import User
-    from nnw_backend.models.refresh_token import RefreshToken
+    from models.user import User
+    from models.refresh_token import RefreshToken
+    from models.profile import Profile
     Base.metadata.create_all(bind=engine)
