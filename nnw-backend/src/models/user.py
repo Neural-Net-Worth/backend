@@ -14,3 +14,5 @@ class User(Base):
         "RefreshToken", back_populates="user", cascade="all, delete-orphan")
     profile = relationship("Profile", back_populates="user",
                            uselist=False, cascade="all, delete-orphan")
+    cardholders = relationship(
+        "Cardholder", back_populates="user", cascade="all, delete-orphan")
