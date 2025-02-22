@@ -22,3 +22,5 @@ class User(Base):
 
     redeemed_rewards = relationship(
         "RedeemedRewards", back_populates="user", cascade="all, delete-orphan")
+    cardholders = relationship(
+        "Cardholder", back_populates="user", cascade="all, delete-orphan")
