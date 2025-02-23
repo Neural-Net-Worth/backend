@@ -3,7 +3,6 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     ENV: str = "development"
-    ENV: str = "development"
     PG_USER: str
     PG_PASSWORD: str
     PG_HOST: str
@@ -11,7 +10,6 @@ class Settings(BaseSettings):
     PG_DB: str
     PG_SSLMODE: str = "require"
     JWT_SECRET: str
-    STRIPE_API_KEY: str
     STRIPE_WEBHOOK_SECRET: str
     STRIPE_API_KEY: str
 
