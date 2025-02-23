@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     JWT_SECRET: str
     STRIPE_WEBHOOK_SECRET: str
     STRIPE_API_KEY: str
+    STRIPE_WEBHOOK_SECRET: str
+    STRIPE_API_KEY: str
 
     @property
     def database_url(self) -> str:

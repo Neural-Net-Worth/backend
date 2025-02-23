@@ -16,3 +16,11 @@ class User(Base):
                            uselist=False, cascade="all, delete-orphan")
     cardholders = relationship(
         "Cardholder", back_populates="user", cascade="all, delete-orphan")
+
+    user_points = relationship(
+        "UserPoints", back_populates="user", cascade="all, delete-orphan")
+
+    redeemed_rewards = relationship(
+        "RedeemedRewards", back_populates="user", cascade="all, delete-orphan")
+    cardholders = relationship(
+        "Cardholder", back_populates="user", cascade="all, delete-orphan")
