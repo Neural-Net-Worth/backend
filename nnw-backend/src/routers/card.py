@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 from config import settings
 from integration.card.card_issuer import CardIssuer
-from integration.card.mock_card_issuer import MockCardIssuer
+from integration.card.mock_card_issuer import MockCardIssuer, CardDetails
 from integration.card.stripe_card_issuer import StripeCardIssuer
 
 router = APIRouter()
@@ -19,19 +19,6 @@ class CreateCardRequest(BaseModel):
     expiration_seconds: int = 3600  # Default expiration window of 1 hour
 
 
-class CardResponse(BaseModel):
-    id: str
-    cardholder: str
-    currency: str
-    purchase_limit: int
-    merchant_id: str
-    last4: str
-    expiration: str
-    usage: str
-    created: str
-    provider: str
-
-
 def get_card_issuer() -> CardIssuer:
     # For an MVP or testing, we use the mock adapter.
     # In production, switch to the StripeCardIssuer.
@@ -40,13 +27,13 @@ def get_card_issuer() -> CardIssuer:
     return MockCardIssuer()
 
 
-@router.post("/cards", response_model=CardResponse)
+@router.post("/cards", response_model=CardDetails)
 async def create_card(
     request: CreateCardRequest,
     card_issuer: CardIssuer = Depends(get_card_issuer)
 ):
     try:
-        card = card_issuer.create_card(
+        card_response = card_issuer.create_card(
             cardholder_id=request.cardholder_id,
             purchase_amount=request.purchase_amount,
             currency=request.currency,
@@ -55,6 +42,8 @@ async def create_card(
             blocked_categories=request.blocked_categories,
             expiration_seconds=request.expiration_seconds,
         )
-        return card
+
+        card_details = card_issuer.get_card_details(card_response.id)
+        return card_details
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
