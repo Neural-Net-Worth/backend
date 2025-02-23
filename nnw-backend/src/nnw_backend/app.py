@@ -30,25 +30,10 @@ app.include_router(user_points_router.router,
                    prefix="/user", tags=["user_points"])
 app.include_router(rewards_router.router, prefix="/rewards")
 
-# Example endpoints
-app.include_router(card.router)
-app.include_router(user_points_router.router,
-                   prefix="/user", tags=["user_points"])
-app.include_router(rewards_router.router, prefix="/rewards")
-
-# Example endpoints
-
-
-@app.get("/hello")
-def hello():
-    return {"message": "Hello, world!"}
-
 
 @app.get("/echo")
 def echo(text: str = "Hello"):
     return {"echo": text}
-
-# Main function to run the app
 
 
 def main():
