@@ -40,3 +40,19 @@ class CardIssuer(ABC):
           An exception if the card creation fails.
         """
         pass
+
+    @abstractmethod
+    def get_card_details(self, card_id: str) -> dict:
+        """
+        Retrieve the details of an existing card by its ID.
+
+        Parameters:
+          - card_id: The unique identifier of the card.
+
+        Returns:
+          A dictionary containing card details if found.
+
+        Raises:
+          An exception if the card retrieval fails or card is not found.
+        """
+        pass
