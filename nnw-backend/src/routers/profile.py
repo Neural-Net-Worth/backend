@@ -1,19 +1,25 @@
+from pydantic import ValidationError
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 import openai
 from models import SessionLocal
 from models.profile import Profile
-import os
 from pydantic import BaseModel
 from config import settings
 
 router = APIRouter()
 
 
-class ProfileResponse(BaseModel):
-    user_id: int
-    name: str
-    ai_suggestion: str
+class BNPLRanking(BaseModel):
+    rank: int
+    provider: str
+    highlight: str
+    reasoning: str
+
+
+class BNPLRankingsResponse(BaseModel):
+    rankings: List[BNPLRanking]
 
 
 def get_db():
@@ -28,7 +34,7 @@ def get_db():
 openai.api_key = settings.OPENAI_API_KEY
 
 
-@router.get("/{user_id}", response_model=ProfileResponse)
+@router.get("/{user_id}", response_model=BNPLRankingsResponse)
 def get_profile_with_ai_suggestion(user_id: int, product_price: float = Query(..., ge=0), db: Session = Depends(get_db)):
     # Fetch profile from the database
     profile = db.query(Profile).filter(Profile.user_id == user_id).first()
@@ -103,31 +109,64 @@ def get_profile_with_ai_suggestion(user_id: int, product_price: float = Query(..
         5. **Clarity & Favorability of Terms:** Consider how clearly and favorably each provider presents its eligibility requirements, fees, and additional benefits (such as Klarna’s cashback, Affirm’s structured loan process, or Clearpay’s interest-free installment plan).
 
         #### Instructions:
-        Rank the BNPL providers **from best to worst** using the evaluation criteria above. Provide a numbered list that includes only the provider names (as given in the BNPL Providers section) along with a brief explanation for each ranking.
+        Rank the BNPL providers **from best to worst** using the evaluation criteria above. 
 
-        For example:
-        1. **Provider A**; 0% Interest Rate!; Klarna is ranked first due to the cashback benefits, clear terms, and low potential for unexpected fees.
-        2. **Provider B**; High Approval Rate; Affirm is second as it provides structured loans but has a higher risk due to interest rates and credit checks.
-        3. **Provider C**; Trusted by 90% of customer; Clearpay ranks third due to its interest-free plan, but late fees may pose a financial burden if payments are missed.
-        Essentially, every ranking should have the provider name first then separated by a ';', the a highlight of why choose that provider, endind with another ';', then a 1-2 sentence description of why that provider is ranked that way.
-        It is encourage if the highlights part could include metrics to show impact.
-        Ensure your final answer strictly follows this format without any extra commentary.
+        Provide a ranked evaluation of BNPL (Buy Now, Pay Later) providers in the following strict JSON format:""" + """```json
+        {
+        "rankings": [
+            {
+            "rank": 1,
+            "provider": "Provider A",
+            "highlight": "0% Interest Rate!",
+            "reasoning": "..."
+            },
+            {
+            "rank": 2,
+            "provider": "Provider B",
+            "highlight": "High Approval Rate",
+            "reasoning": "..."
+            },
+            {
+            "rank": 3,
+            "provider": "Provider C",
+            "highlight": "Trusted by 90% of customers",
+            "reasoning": "..."
+            }
+        ]
+        }
+        ```
+
+        **Requirements:**
+        1. Each ranking must include:
+        - `"rank"`: An integer indicating the position (e.g., 1, 2, 3).
+        - `"provider"`: The name of the BNPL provider.
+        - `"highlight"`: A short, impactful highlight (e.g., "0% Interest Rate!", "High Approval Rate", "Trusted by 90% of customers").
+        - `"reasoning"`: A summarized reasoning based on the evaluation criteria.
+        
+        2. The `"highlight"` field should include metrics or quantitative impact wherever possible.
+
+        3. Please respond with the JSON as plain text, without any formatting, code blocks, or additional commentary.
     """
 
     # Call OpenAI API
     try:
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            messages=[{"role": "system", "content": "You are a financial assistant."},
+            messages=[{"role": "system", "content": "You are a financial advisor that evaluates BNPL (Buy Now, Pay Later) options for users."},
                       {"role": "user", "content": prompt}],
             temperature=0.7
         )
         ai_suggestion = response["choices"][0]["message"]["content"]
+
+        # Parse the LLM response into the Pydantic model
+        try:
+            bnpl_rankings = BNPLRankingsResponse.model_validate_json(
+                ai_suggestion)
+        except ValidationError as ve:
+            raise HTTPException(
+                status_code=500, detail=f"Validation Error: {ve}")
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"OpenAI Error: {str(e)}")
 
-    return ProfileResponse(
-        user_id=user_id,
-        name=profile.name,
-        ai_suggestion=ai_suggestion
-    )
+    return bnpl_rankings
