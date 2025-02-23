@@ -13,4 +13,6 @@ def init_db():
     from models.user import User
     from models.refresh_token import RefreshToken
     from models.profile import Profile
+    from models.user_points import UserPoints
+    from models.redeemed_rewards import RedeemedRewards
     Base.metadata.create_all(bind=engine)
