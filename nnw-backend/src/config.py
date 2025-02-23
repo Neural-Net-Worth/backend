@@ -10,8 +10,9 @@ class Settings(BaseSettings):
     PG_DB: str
     PG_SSLMODE: str = "require"
     JWT_SECRET: str
-    STRIPE_WEBHOOK_SECRET: str
     STRIPE_API_KEY: str
+    STRIPE_WEBHOOK_SECRET: str
+    OPENAI_API_KEY: str
 
     @property
     def database_url(self) -> str:
