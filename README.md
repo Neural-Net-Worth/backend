@@ -1,4 +1,4 @@
-# NNW Backend Setup Instructions
+# SmartPay Backend Setup Instructions
 
 ## Prerequisites
 - Python 3.9+
@@ -8,7 +8,7 @@
 
 1. **Unzip the project archive**
 ```bash
-unzip nnw-backend.zip
+unzip smartpay-backend.zip
 ```
 
 2. **Navigate to the project root**
