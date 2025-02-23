@@ -13,9 +13,9 @@ from models.user import User
 from models.profile import Profile
 from models.cardholder import Cardholder
 
-from integration.card_issuer.cardholder import CardholderIssuer
-from integration.card_issuer.mock_cardholder import MockCardholderIssuer
-from integration.card_issuer.stripe_cardholder import StripeCardholderIssuer
+from integration.card.cardholder import CardholderIssuer
+from integration.card.mock_cardholder import MockCardholderIssuer
+from integration.card.stripe_cardholder import StripeCardholderIssuer
 
 from config import settings
 
