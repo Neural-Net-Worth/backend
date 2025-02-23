@@ -25,6 +25,7 @@ app.add_middleware(
 init_db()
 
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
+app.include_router(card.router)
 app.include_router(user_points_router.router,
                    prefix="/user", tags=["user_points"])
 app.include_router(rewards_router.router, prefix="/rewards")
